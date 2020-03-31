@@ -22,10 +22,22 @@ dataTh2 = np.array([1, 2, 4])
 dataTh4 = np.array([0.8, 1, 3])
 dataTh8 = np.array([0.5, 0.2, 2])
 dataTh16 = np.array([0.2, 0.1, 1])
-
+# =======================================================================
 # Todo enter data, cal median and mod dataSec dataTh#
 #
 #
+cereal_df = pd.read_csv("example.csv")
+print(cereal_df)
+num = cereal_df.to_numpy()
+median = []
+for val in num:
+    median.append(np.median(val))
+dataSec = median[0:3]
+dataTh2 = median[3:6]
+dataTh4 = median[6:9]
+dataTh8 = median[9:12]
+dataTh16 = median[12:15] 
+# =======================================================================
 decimals = 1
 speedupTh2 = np.around(np.divide(dataSec, dataTh2), decimals=decimals)
 speedupTh4 = np.around(np.divide(dataSec, dataTh4), decimals=decimals)
