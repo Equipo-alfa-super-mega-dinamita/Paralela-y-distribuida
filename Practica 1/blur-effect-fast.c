@@ -9,7 +9,11 @@
 int mirror(int a, int N){
     if(a < 0) return -a - 1;
     else if(a > N - 1) return N + N - 1 - a;
-    else return a;    
+    else return a;
+
+    //if(a < 0) a = -a - 1;
+    //else if(a > N - 1) a = N + N - 1 - a;
+    
 }
 
 int main(int argc,char *argv[]){
@@ -38,6 +42,12 @@ int main(int argc,char *argv[]){
 
     //Modificación imagen a una nueva
     size_t img_size = w * h * channels;
+
+    unsigned char* blur0 = malloc(img_size);
+    if(blur0 == NULL){
+        printf("Error creando nueva imagen (malloc) (F)");
+        exit(1);
+    }
     
     unsigned char* blur = malloc(img_size);
     if(blur == NULL){
@@ -53,24 +63,13 @@ int main(int argc,char *argv[]){
             int B = 0;
 
             for( int j = -k; j<= k ; j++){
-                
-                int sR = 0;
-                int sG = 0;
-                int sB = 0;
 
                 int ny = mirror(cy + j, h);
-                
-                for( int i = -k; i<= k ; i++){
-                    
-                    int nx = mirror(cx + i, w);
-                    sR+= (uint8_t) *(img + channels*( nx + ny*w ));
-                    sG+= (uint8_t) *(img + channels*( nx + ny*w ) + 1);
-                    sB+= (uint8_t) *(img + channels*( nx + ny*w ) + 2);
 
-                }
-                R+= sR/kS;
-                G+= sG/kS;
-                B+= sB/kS;
+                R+= (uint8_t) *(img + channels*( cx + ny*w ));
+                G+= (uint8_t) *(img + channels*( cx + ny*w ) + 1);
+                B+= (uint8_t) *(img + channels*( cx + ny*w ) + 2);
+
             }
 
             *(blur0 + channels*( cx + cy*w ))       = R/kS;
@@ -78,6 +77,31 @@ int main(int argc,char *argv[]){
             *(blur0 + channels*( cx + cy*w ) + 2)   = B/kS;
         }
     }
+
+    //Horizontal Blur on Vertical Blurred image
+    for (int cx = 0; cx < w; cx ++){
+        for (int cy = 0; cy < h; cy ++){
+            int R = 0;
+            int G = 0;
+            int B = 0;
+
+            for( int i = -k; i<= k ; i++){
+
+                int nx = mirror(cx + i, w);
+
+                R+= (uint8_t) *(blur0 + channels*( nx + cy*w ));
+                G+= (uint8_t) *(blur0 + channels*( nx + cy*w ) + 1);
+                B+= (uint8_t) *(blur0 + channels*( nx + cy*w ) + 2);
+
+            }
+        
+
+            *(blur + channels*( cx + cy*w ))       = R/kS;
+            *(blur + channels*( cx + cy*w ) + 1)   = G/kS;
+            *(blur + channels*( cx + cy*w ) + 2)   = B/kS;
+        }
+    }
+
 
 
     //Escritura imagen nueva
