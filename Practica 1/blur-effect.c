@@ -93,40 +93,6 @@ int main(int argc,char *argv[]){
         printf("Error creando nueva imagen (malloc blur) (F)");
         exit(1);
     }
-    
-    //Vertical Blur
-    /*for (int cx = 0; cx < w; cx ++){
-        for (int cy = 0; cy < h; cy ++){
-            int R = 0;
-            int G = 0;
-            int B = 0;
-
-            for( int j = -k; j<= k ; j++){
-                
-                int sR = 0;
-                int sG = 0;
-                int sB = 0;
-
-                int ny = mirror(cy + j, h);
-                
-                for( int i = -k; i<= k ; i++){
-                    
-                    int nx = mirror(cx + i, w);
-                    sR+= (uint8_t) *(img + channels*( nx + ny*w ));
-                    sG+= (uint8_t) *(img + channels*( nx + ny*w ) + 1);
-                    sB+= (uint8_t) *(img + channels*( nx + ny*w ) + 2);
-
-                }
-                R+= sR/kS;
-                G+= sG/kS;
-                B+= sB/kS;
-            }
-
-            *(blur + channels*( cx + cy*w ))       = R/kS;
-            *(blur + channels*( cx + cy*w ) + 1)   = G/kS;
-            *(blur + channels*( cx + cy*w ) + 2)   = B/kS;
-        }
-    }*/
 
     int threadId[threadNum], i ,*retval;
 
