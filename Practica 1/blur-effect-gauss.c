@@ -2,11 +2,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <math.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image/stb_image_write.h"
+
+#define WEIGHT 4.1f
 
 int k;
 int w, h, channels;
@@ -15,6 +18,31 @@ unsigned char* blur;
 int threadNum;
 int kS;
 
+float weightMatr[30][30];
+
+float gaussDistr(int x, int y, float weight){
+    return powf(M_E, -(x*x+y*y)/(2*weight*weight))/(2*M_PI*weight*weight);
+}
+
+void initWeightMatr(float kern){   
+    float sum = 0; 
+    for(int a=-k;a<=k;a++){
+        for(int b=-k;b<=k;b++){
+            float res = gaussDistr(a,b,WEIGHT);
+            weightMatr[a+k][b+k] = res;
+            sum += res;
+        }
+    }
+    for(int a=-k;a<=k;a++){
+        for(int b=-k;b<=k;b++){
+            weightMatr[a+k][b+k] /= sum;
+            //printf("%f  ",weightMatr[a+k][b+k]);
+        }
+        //printf("\n");
+    }
+
+}
+
 int mirror(int a, int N){
     if(a < 0) return -a - 1;
     else if(a > N - 1) return N + N - 1 - a;
@@ -22,11 +50,10 @@ int mirror(int a, int N){
 }
 
 void *calcColumn(void *arg){
-    int chunkSize = (int)floor(w/threadNum);
     int threadId = *(int *)arg;
-    int start = chunkSize * threadId;
-    int end = start + (chunkSize - 1);
-    if(threadId == threadNum-1) end = w;
+    int start = (w/threadNum) * threadId;
+    int end = start + ((w/threadNum) - 1);
+    if(threadId == threadNum-1) end = start + (w/threadNum);
 
     for (int cx = start; cx <= end; cx ++){
         for (int cy = 0; cy < h; cy ++){
@@ -42,20 +69,23 @@ void *calcColumn(void *arg){
 
                 int ny = mirror(cy + j, h);
                 
-                for( int i = -k; i<= k ; i++){                    
+                for( int i = -k; i<= k ; i++){
+                    
                     int nx = mirror(cx + i, w);
-                    sR+= (uint8_t) *(img + channels*( nx + ny*w ));
-                    sG+= (uint8_t) *(img + channels*( nx + ny*w ) + 1);
-                    sB+= (uint8_t) *(img + channels*( nx + ny*w ) + 2);                
+                    float weight = weightMatr[i+k][j+k];
+                    sR+= (uint8_t) (int)(*(img + channels*( nx + ny*w ))*weight);
+                    sG+= (uint8_t) (int)(*(img + channels*( nx + ny*w ) + 1)*weight);
+                    sB+= (uint8_t) (int)(*(img + channels*( nx + ny*w ) + 2)*weight);
+
                 }
-                R+= sR/kS;
-                G+= sG/kS;
-                B+= sB/kS;
+                R+= sR;
+                G+= sG;
+                B+= sB;
             }
 
-            *(blur + channels*( cx + cy*w ))       = R/kS;
-            *(blur + channels*( cx + cy*w ) + 1)   = G/kS;
-            *(blur + channels*( cx + cy*w ) + 2)   = B/kS;
+            *(blur + channels*( cx + cy*w ))       = R;
+            *(blur + channels*( cx + cy*w ) + 1)   = G;
+            *(blur + channels*( cx + cy*w ) + 2)   = B;
         }
     }
     return 0;
@@ -73,6 +103,7 @@ int main(int argc,char *argv[]){
     //int k; GLOBAL
     k = (kS - 1) / 2;
 
+    initWeightMatr(atof(argv[3]));
     //Lectura de la imagen ----------
     //int w, h, channels; GLOBAL
     //unsigned char *img; GLOBAL
