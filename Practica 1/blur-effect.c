@@ -22,10 +22,11 @@ int mirror(int a, int N){
 }
 
 void *calcColumn(void *arg){
+    int chunkSize = (int)floor(w/threadNum);
     int threadId = *(int *)arg;
-    int start = (w/threadNum) * threadId;
-    int end = start + ((w/threadNum) - 1);
-    if(threadId == threadNum-1) end = start + (w/threadNum);
+    int start = chunkSize * threadId;
+    int end = start + (chunkSize - 1);
+    if(threadId == threadNum-1) end = w;
 
     for (int cx = start; cx <= end; cx ++){
         for (int cy = 0; cy < h; cy ++){
@@ -41,13 +42,11 @@ void *calcColumn(void *arg){
 
                 int ny = mirror(cy + j, h);
                 
-                for( int i = -k; i<= k ; i++){
-                    
+                for( int i = -k; i<= k ; i++){                    
                     int nx = mirror(cx + i, w);
                     sR+= (uint8_t) *(img + channels*( nx + ny*w ));
                     sG+= (uint8_t) *(img + channels*( nx + ny*w ) + 1);
-                    sB+= (uint8_t) *(img + channels*( nx + ny*w ) + 2);
-
+                    sB+= (uint8_t) *(img + channels*( nx + ny*w ) + 2);                
                 }
                 R+= sR/kS;
                 G+= sG/kS;
