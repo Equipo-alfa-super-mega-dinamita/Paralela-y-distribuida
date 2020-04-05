@@ -38,7 +38,7 @@ int main(int argc,char *argv[]){
         printf("Error leyendo imagen");
         exit(1);
     }
-    printf("Image read: %s - Width: %i ,Height: %i ,Channels: %i\n",inputFile,w,h,channels);
+    //printf("Image read: %s - Width: %i ,Height: %i ,Channels: %i\n",inputFile,w,h,channels);
 
     //Modificación imagen a una nueva
     size_t img_size = w * h * channels;
