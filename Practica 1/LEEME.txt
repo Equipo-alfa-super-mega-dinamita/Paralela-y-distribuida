@@ -1,0 +1,22 @@
+->Prerrequisitos para correr blur-effect.c
+
+Tener la carpeta stb_image
+
+->Comando para correr blur-effect.c
+El establecido en la práctica. Comando de ejemplo:
+./blur 4k.jpg 4k_blur.jpg 15 8
+
+->Prerrequisitos para correr el script
+Python3, librería pandas (pip install pandas)
+Las imagenes deben llamarse 4k.jpg, 720.jpg y 1080.jpg. En caso de querer modificarlos puede hacerse en el arreglo "image_names" al interior del script.
+
+->Comando para correr el script de las pruebas
+/usr/bin/python3 ./script_ejecutar_todo.py
+
+Integrantes:
+Alberto Nicolai Romero Martínez
+Edder Hernández Forero
+Julián David Rodríguez Ruíz
+
+NOTA:
+blur-effect-fast.c es utilizado como una implementación alternativa más rápida. Pero para los fines de la práctica se hizo uso de la implementación más lenta: blur-effect.c
