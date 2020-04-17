@@ -96,6 +96,11 @@ int main(int argc,char *argv[]){
     int threadId[threadNum], i ,*retval;
 
     pthread_t thread[threadNum];
+    /*
+    #pragma omp parallel num_threads(threadNum)
+    {
+
+    }*/
 
     for(i = 0; i < threadNum; i++){
         threadId[i] = i;
