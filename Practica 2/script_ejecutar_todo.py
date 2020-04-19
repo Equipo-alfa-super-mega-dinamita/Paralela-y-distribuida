@@ -9,7 +9,7 @@ import os
 import struct
 
 #!gcc blur-effect.c -o blur -lm -pthread
-os.system('gcc blur-effect.c -o blur -lm -pthread')
+os.system('gcc blur-effect.c -o blur -lm -fopenmp')
 
 
 
