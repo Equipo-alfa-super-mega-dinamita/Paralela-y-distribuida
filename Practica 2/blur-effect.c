@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pthread.h>
+#include <omp.h> 
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image/stb_image.h"
@@ -21,14 +21,38 @@ int mirror(int a, int N){
     else return a;    
 }
 
-void *calcColumn(void *arg){
-    int chunkSize = (int)floor(w/threadNum);
-    int threadId = *(int *)arg;
-    int start = chunkSize * threadId;
-    int end = start + (chunkSize - 1);
-    if(threadId == threadNum-1) end = w;
+int main(int argc,char *argv[]){
+    //Lectura de argumentos -------
+    char *inputFile = argv[1];
+    char *outputFile = argv[2];
+    kS = atoi(argv[3]); //Kernel size
+    threadNum = atoi(argv[4]); //Numero de hilos
 
-    for (int cx = start; cx <= end; cx ++){
+    //int k; GLOBAL
+    k = (kS - 1) / 2;
+
+    //Lectura de la imagen ----------
+    img = stbi_load(inputFile, &w, &h, &channels, 0);
+    if(img == NULL){
+        printf("Error leyendo imagen");
+        exit(1);
+    }
+
+    //Modificación imagen a una nueva
+    size_t img_size = w * h * channels;
+    
+    blur = malloc(img_size);
+    if(blur == NULL){
+        printf("Error creando nueva imagen (malloc blur) (F)");
+        exit(1);
+    }
+
+    //omp_set_dynamic(0);
+    omp_set_num_threads(threadNum);
+
+    #pragma omp parallel
+    #pragma omp for schedule(static)
+    for (int cx = 0; cx <= w; cx ++){
         for (int cy = 0; cy < h; cy ++){
             int R = 0;
             int G = 0;
@@ -58,58 +82,7 @@ void *calcColumn(void *arg){
             *(blur + channels*( cx + cy*w ) + 2)   = B/kS;
         }
     }
-    return 0;
-}
 
-int main(int argc,char *argv[]){
-    //Lectura de argumentos -------
-    char *inputFile = argv[1];
-    char *outputFile = argv[2];
-    //int kS; GLOBAL
-    kS = atoi(argv[3]); //Kernel size
-    //int threadNum; GLOBAL
-    threadNum = atoi(argv[4]);
-
-    //int k; GLOBAL
-    k = (kS - 1) / 2;
-
-    //Lectura de la imagen ----------
-    //int w, h, channels; GLOBAL
-    //unsigned char *img; GLOBAL
-    img = stbi_load(inputFile, &w, &h, &channels, 0);
-    if(img == NULL){
-        printf("Error leyendo imagen");
-        exit(1);
-    }
-    //printf("Image read: %s - Width: %i ,Height: %i ,Channels: %i\n",inputFile,w,h,channels);
-
-    //Modificación imagen a una nueva
-    size_t img_size = w * h * channels;
-    
-    //unsigned char* blur; GLOBAL
-    blur = malloc(img_size);
-    if(blur == NULL){
-        printf("Error creando nueva imagen (malloc blur) (F)");
-        exit(1);
-    }
-
-    int threadId[threadNum], i ,*retval;
-
-    pthread_t thread[threadNum];
-    /*
-    #pragma omp parallel num_threads(threadNum)
-    {
-
-    }*/
-
-    for(i = 0; i < threadNum; i++){
-        threadId[i] = i;
-        pthread_create(&thread[i], NULL, (void *)calcColumn, &threadId[i]);    
-    }
-
-    for(i = 0; i < threadNum; i++){
-        pthread_join(thread[i], (void **)&retval);
-    }
 
     //Escritura imagen nueva
     stbi_write_jpg(outputFile, w, h, channels, blur, 100);
