@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <omp.h> 
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image/stb_image.h"
@@ -55,7 +56,11 @@ int main(int argc,char *argv[]){
         exit(1);
     }
     
+
+    omp_set_num_threads(threadNum);
+
     //Vertical Blur
+    #pragma omp parallel for schedule(static) collapse(2)
     for (int cx = 0; cx < w; cx ++){
         for (int cy = 0; cy < h; cy ++){
             int R = 0;
@@ -79,6 +84,7 @@ int main(int argc,char *argv[]){
     }
 
     //Horizontal Blur on Vertical Blurred image
+    #pragma omp parallel for schedule(static) collapse(2)
     for (int cx = 0; cx < w; cx ++){
         for (int cy = 0; cy < h; cy ++){
             int R = 0;
