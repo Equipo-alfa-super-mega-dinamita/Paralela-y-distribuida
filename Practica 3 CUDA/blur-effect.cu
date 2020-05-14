@@ -31,7 +31,7 @@ __global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,in
 
   int k = (kS - 1) / 2;
  
-  printf("Start: %i, End: %i",start,end);
+  printf("Start: %i, End: %i \n",start,end);
     
   for (int cx = start; cx <= end; cx ++){
         for (int cy = 0; cy < height; cy ++){
