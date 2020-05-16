@@ -20,19 +20,21 @@ __device__ int mirror(int a, int N){
 }
 
 
-__global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,int height,int channels,int kS, int totalThreads)
+__global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,int height,int channels,int kS, int totalThreads, int chunkSize)
 {       
- 
-  int chunkSize = (int)floorf(width/totalThreads);
   int index = (blockDim.x * blockIdx.x) + threadIdx.x;
   int start = chunkSize * index;
-  int end = start + (chunkSize - 1);
-  if(index == totalThreads-1) end = width;
+  int end = start + (chunkSize - 1);  
+
+  if(end >= width) end = width;
+  if(start>=width){
+    printf("Hilo no util:%i \n",index);
+    return;
+  }
 
   int k = (kS - 1) / 2;
  
-  printf("Start: %i, End: %i \n",start,end);
-    
+  printf("S: %i, E: %i C: %i ,I: %i\n",start,end,chunkSize, index);
   for (int cx = start; cx <= end; cx ++){
         for (int cy = 0; cy < height; cy ++){
             int R = 0;
@@ -131,11 +133,14 @@ int main(int argc,char *argv[])
     }
 
     /****Lanzamiento de kernel*****/
-    int NUMTHREADS = numBlocks*maxNumTh;
-    int threadsPerBlock = NUMTHREADS/numBlocks;
-    int totalThreads = numBlocks * threadsPerBlock;
+    //int totalThreads = numBlocks*maxNumTh;
+    int totalThreads = atoi(argv[4]);
+    int threadsPerBlock = totalThreads/numBlocks;
+    //int chunkSize = (int)ceil(w/totalThreads);
+    int chunkSize = (w + totalThreads - 1)/totalThreads;
+
     printf("CUDA kernel lanzado con %d blocks of %d threads Total: %i       ", numBlocks, threadsPerBlock, totalThreads  );
-    blurKernel<<<numBlocks,threadsPerBlock>>>(d_blur,d_img,w,h,channels,kS,totalThreads);
+    blurKernel<<<numBlocks,threadsPerBlock>>>(d_blur,d_img,w,h,channels,kS,totalThreads,chunkSize);
     err = cudaGetLastError();
     if(err != cudaSuccess){
         fprintf(stderr, "Error lanzando blur kernel (error code %s)!\n", cudaGetErrorString(err));
