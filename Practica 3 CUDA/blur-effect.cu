@@ -134,7 +134,8 @@ int main(int argc,char *argv[])
 
     /****Lanzamiento de kernel*****/
     //int totalThreads = numBlocks*maxNumTh;
-    int totalThreads = atoi(argv[4]);
+    numBlocks = atoi(argv[4]);
+    int totalThreads = atoi(argv[5]);    
     int threadsPerBlock = totalThreads/numBlocks;
     //int chunkSize = (int)ceil(w/totalThreads);
     int chunkSize = (w + totalThreads - 1)/totalThreads;
