@@ -26,8 +26,8 @@ __global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,in
   int start = chunkSize * index;
   int end = start + (chunkSize - 1);  
 
-  if(end >= width) end = width;
-  if(start>=width){
+  if(end >= width*3) end = width*3;
+  if(start>=width*3){
     printf("Hilo no util:%i \n",index);
     return;
   }
@@ -38,14 +38,14 @@ __global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,in
   for (int cx = start; cx <= end; cx ++){
         for (int cy = 0; cy < height; cy ++){
             int R = 0;
-            int G = 0;
-            int B = 0;
+            //int G = 0;
+            //int B = 0;
 
             for( int j = -k; j<= k ; j++){
                 
                 int sR = 0;
-                int sG = 0;
-                int sB = 0;
+                //int sG = 0;
+                //int sB = 0;
 
                 int ny = mirror(cy + j, height);
                 
@@ -53,17 +53,17 @@ __global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,in
                     int nx = mirror(cx + i, width);
                     //MODIFICAR, LECTURA DE LA IMAGEN
                     sR+= (uint8_t) *(img + channels*( nx + ny*width ));
-                    sG+= (uint8_t) *(img + channels*( nx + ny*width ) + 1);
-                    sB+= (uint8_t) *(img + channels*( nx + ny*width ) + 2);                
+                    //sG+= (uint8_t) *(img + channels*( nx + ny*width ) + 1);
+                    //sB+= (uint8_t) *(img + channels*( nx + ny*width ) + 2);                
                 }
                 R+= sR/kS;
-                G+= sG/kS;
-                B+= sB/kS;
+                //G+= sG/kS;
+                //B+= sB/kS;
             }
             //MODIFICAR, ESCRITURA DE LA IMAGEN
             *(blur + channels*( cx + cy*width ))       = R/kS;
-            *(blur + channels*( cx + cy*width ) + 1)   = G/kS;
-            *(blur + channels*( cx + cy*width ) + 2)   = B/kS;
+            //*(blur + channels*( cx + cy*width ) + 1)   = G/kS;
+            //*(blur + channels*( cx + cy*width ) + 2)   = B/kS;
         }
     }
   
@@ -138,7 +138,7 @@ int main(int argc,char *argv[])
     int totalThreads = atoi(argv[5]);    
     int threadsPerBlock = totalThreads/numBlocks;
     //int chunkSize = (int)ceil(w/totalThreads);
-    int chunkSize = (w + totalThreads - 1)/totalThreads;
+    int chunkSize = (w*3 + totalThreads - 1)/totalThreads;
 
     printf("CUDA kernel lanzado con %d blocks of %d threads Total: %i       ", numBlocks, threadsPerBlock, totalThreads  );
     blurKernel<<<numBlocks,threadsPerBlock>>>(d_blur,d_img,w,h,channels,kS,totalThreads,chunkSize);
