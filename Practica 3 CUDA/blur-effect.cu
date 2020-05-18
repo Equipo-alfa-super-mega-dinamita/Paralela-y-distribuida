@@ -14,7 +14,9 @@
 *****************************************************************************/
 
 __device__ int mirror(int a, int N){
+    
     if(a < 0) return -a - 1;
+
     else if(a > N - 1) return N + N - 1 - a;
     else return a;
 }
@@ -25,9 +27,10 @@ __global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,in
   int index = (blockDim.x * blockIdx.x) + threadIdx.x;
   int start = chunkSize * index;
   int end = start + (chunkSize - 1);  
-
-  if(end >= width*3) end = width*3;
-  if(start>=width*3){
+  int w = width*3;
+  
+  if(end >= w) end = w;
+  if(start>=w){
     printf("Hilo no util:%i \n",index);
     return;
   }
@@ -46,13 +49,12 @@ __global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,in
                 int sR = 0;
                 //int sG = 0;
                 //int sB = 0;
-
                 int ny = mirror(cy + j, height);
                 
-                for( int i = -k; i<= k ; i++){                    
-                    int nx = mirror(cx + i, width);
+                for( int i = -channels*k; i<= channels*k ; i+=channels){                    
+                    int nx = mirror(cx + i, w);
                     //MODIFICAR, LECTURA DE LA IMAGEN
-                    sR+= (uint8_t) *(img + channels*( nx + ny*width ));
+                    sR+= (uint8_t) *(img + (nx + ny*w));
                     //sG+= (uint8_t) *(img + channels*( nx + ny*width ) + 1);
                     //sB+= (uint8_t) *(img + channels*( nx + ny*width ) + 2);                
                 }
@@ -61,7 +63,7 @@ __global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,in
                 //B+= sB/kS;
             }
             //MODIFICAR, ESCRITURA DE LA IMAGEN
-            *(blur + channels*( cx + cy*width ))       = R/kS;
+            *(blur + ( cx + cy*w ))  = R/kS;
             //*(blur + channels*( cx + cy*width ) + 1)   = G/kS;
             //*(blur + channels*( cx + cy*width ) + 2)   = B/kS;
         }
