@@ -85,7 +85,7 @@ int main(int argc,char *argv[])
     cudaGetDevice ( &device );
     cudaDeviceGetAttribute ( &maxNumTh, cudaDevAttrMaxThreadsPerBlock, device);
     cudaDeviceGetAttribute ( &numBlocks, cudaDevAttrMultiProcessorCount, device);
-    printf("numTh: %i numBlocks: %i \n",maxNumTh,numBlocks);
+    //printf("numTh: %i numBlocks: %i \n",maxNumTh,numBlocks);
 
 
     //****Lectura de argumentos***//
@@ -142,7 +142,7 @@ int main(int argc,char *argv[])
     //int chunkSize = (int)ceil(w/totalThreads);
     int chunkSize = (w*3 + totalThreads - 1)/totalThreads;
 
-    printf("CUDA kernel lanzado con %d blocks of %d threads Total: %i       ", numBlocks, threadsPerBlock, totalThreads  );
+    //printf("CUDA kernel lanzado con %d blocks of %d threads Total: %i       ", numBlocks, threadsPerBlock, totalThreads  );
     blurKernel<<<numBlocks,threadsPerBlock>>>(d_blur,d_img,w,h,channels,kS,totalThreads,chunkSize);
     err = cudaGetLastError();
     if(err != cudaSuccess){
