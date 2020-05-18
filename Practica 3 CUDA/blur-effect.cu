@@ -31,7 +31,7 @@ __global__ void blurKernel(unsigned char *blur, unsigned char *img, int width,in
   
   if(end >= w) end = w;
   if(start>=w){
-    printf("Hilo no util:%i \n",index);
+    //printf("Hilo no util:%i \n",index);
     return;
   }
 
